@@ -1,0 +1,82 @@
+(1) Enumeración de las clases léxicas del lenguaje. Para cada clase debe incluirse, además,
+una descripción informal, en lenguaje natural.
+
+PROGRAMA: expresion con el conjunto del programa
+DECLARACIONES: fragmento del codigo que genera las declaraciones
+DECLARACION: genera una declaracion
+TIPO: identifica el tipo de la declaracion
+SEP_ENTRADA: limite entre los dor fragmentos del programa a procesar
+FIN_LINEA: identificador que marca donde termina una declaracion o una instruccion
+INSTRUCCIONES: genera todas las instrucciones
+INSTRUCCION: genera una instruccion
+VARIABLE: identifica las variables del codigo
+LETRA: letras a-z, A-Z, _
+DIGITO: numeros del 0 al 9
+EXPRESIONES: genera una expresion simple (sin parentesis) o una expresion recursiva con parentesis a ambos lados y opcionalmente le añade un operador y otra expresion recursiva
+EXPRESION: 
+NUM: 
+SIGNO:  
+DECIMAL:  
+EXP:  
+BOOLEAN:   
+OPERADOR:  
+ARIT_BIN:  
+LOGICO:  
+RELACIONALES:  
+P_APPE: 
+P_CIER:  
+
+
+(2) Una especificación formal del léxico del lenguaje mediante definiciones regulares.
+
+PROGRAMA: DECLARACIONES, SEP_ENTRADA, INSTRUCCIONES
+
+	DECLARACIONES: DECLARACION, (FIN_LINEA, DECLARACION)*
+
+		DECLARACION: TIPO, VARIABLE
+
+			TIPO: [num, bool]
+
+	SEP_ENTRADA: [&&]
+
+	FIN_LINEA: [;]
+
+	INSTRUCCIONES: INSTRUCCION, (FIN_LINEA, INSTRUCCION)*
+
+		INSTRUCCION: VARIABLE, =, EXPRESIONES
+
+			VARIABLE: LETRA, (LETRA | DIGITO | _)*
+
+				LETRA: [a-z, A-Z]
+
+				DIGITO: [0-9]
+
+			EXPRESIONES: (P_APPE, EXPRESIONES, P_CIER, (OPERADOR, P_APPE, EXPRESIONES, P_CIER)*) | EXPRESION //aqui preguntar
+
+				EXPRESION: (NUM | VARIABLE | BOOLEAN), (OPERADOR, (NUM | VARIABLE | BOOLEAN))*
+
+					NUM: SIGNO?, DIGITO, DIGITO*, DECIMAL?, EXP?
+
+						SIGNO: [\+, \-]
+
+						DECIMAL: \., DIGITO, DIGITO*
+
+						EXP: (e | E), SIGNO?, DIGITO, DIGITO*
+
+					BOOLEAN: [true, false]
+
+					OPERADOR: ARIT_BIN | LOGICO | RELACIONALES
+
+						ARIT_BIN: [\+, \-, \*, /]
+
+						LOGICO: [and, or, not]
+
+						RELACIONALES: [\<, \>, \<=, \>=, \==, \!=]
+
+				P_APPE: [\(]
+
+				P_CIER: [\)]
+
+
+(3) Diseño de un analizador léxico para el lenguaje mediante un diagrama de transiciones
+

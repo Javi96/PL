@@ -1,0 +1,131 @@
+operador	tipo			prio	asoc
++			binario infijo	0		izquierda
+-			binario infijo	0		izquierda
+
+and			binario infijo	1		derecha
+or			binario infijo	1		no asocia
+
+rel			binario infijo	2		no asocia
+
+*			binario infijo	3		izquierda
+/			binario infijo	3		izquierda
+
+-			unario	prefijo	4		izquierda
+not			unario	prefijo	4		no asocia
+
+rel = {<,>,<=,>=,==,!=}
+
+E0 -> E0 + E1 | E0 - E1 | E1
+E1 -> E2 and E1 | E2 or E2 | E2
+E2 -> E3 rel E3
+E3 -> E3 * E4 | E3 / E4 | E4
+E4 -> - E4 | not E5 | E5  
+E5 -> num | iden | bool
+
+{*,/,-, not, num, iden, bool, +, -} ?? duda con los menos unario y binario
+PRIM(E0) -> PRIM(E0) + PRIM(+) + PRIM(E1) 
+			U
+			PRIM(E0) + PRIM(-) + PRIM(E1)
+			U
+			PRIM(E1)
+
+{*,/,-, not, num, iden, bool}
+PRIM(E1) -> PRIM(E2) + PRIM(and) + PRIM(E1)
+			U
+			PRIM(E2) + PRIM(or) + PRIM(E2)
+			U
+			PRIM(E2)
+
+{*,/,-, not, num, iden, bool}
+PRIM(E2) -> PRIM(E3) + PRIM(rel) + PRIM(E3)
+
+{*,/,-, not, num, iden, bool}
+PRIM(E3) -> PRIM(E3) + PRIM(*) + PRIM(E4)
+			U
+			PRIM(E3) + PRIM(/) + PRIM(E4)
+			U
+			PRIM(E4)
+
+{-, not, num, iden, bool}
+PRIM(E4) -> PRIM(-) + PRIM(E4)
+			U
+			PRIM(not) + PRIM(E5)
+			U
+			PRIM(E5) 
+
+{num, iden, bool}
+PRIM(E5) -> num 
+			U 
+			iden 
+			U 
+			bool
+
+
+E0 -> E0 + E1 
+E0 -> E0 - E1
+E0 -> E1
+
+E1 -> E2 and E1
+E1 -> E2 or E2
+E1 -> E2
+
+E2 -> E3 rel E3
+
+E3 -> E3 * E4
+E3 -> E3 / E4
+E3 -> E4
+
+E4 -> - E4
+E4 -> not E5
+E4 -> E5  
+
+E5 -> num | iden | bool
+
+{+,-}
+SIG(E0) -> PRIM(+) + PRIM(E1) + SIG(E0) = +
+		   PRIM(-) + PRIM(E1) + SIG(E0) = -
+{+,-}
+SIG(E1) -> SIG(E0) U SIG(E1) = + -
+
+{and,or,+,-}
+SIG(E2) -> PRIM(and) + PRIM(E1) + SIG(E1) = and
+		   PRIM(or) + PRIM(E2) + SIG(E1) = or
+		   SIG(E1) = + -
+
+{+,-,*,/,rel,and,or}
+SIG(E3) -> PRIM(rel) + PRIM(E3) + SIG(E2) = rel
+		   SIG(E2) = + - and or
+		   PRIM(*) + PRIM(E4) + SIG(E3) = *
+		   PRIM(/) + PRIM(E4) + SIG(E3) = /
+
+{+,-,*,/,rel,and,or}
+SIG(E4) -> SIG(E3) 
+		   SIG(E4)
+
+{+,-,*,/,rel,and,or}
+SIG(E5) -> SIG(E4)
+
+
+
+
+DIR(E0 -> E0 + E1) 				= PRIM(E0) + PRIM(+) + PRIM(E1) + SIG(E0) 	= {*,/,-, not, num, iden, bool, +, -}
+DIR(E0 -> E0 - E1) 				= PRIM(E0) + PRIM(-) + PRIM(E1) + SIG(E0)	= {*,/,-, not, num, iden, bool, +, -}
+DIR(E0 -> E1) 					= PRIM(E1) + SIG(E0) 						= {*,/,-, not, num, iden, bool}
+
+DIR(E1 -> E2 and E1)			= PRIM(E2) + PRIM(and) + PRIM(E1) + SIG(E1)	= {*,/,-, not, num, iden, bool}
+DIR(E1 -> E2 or E2)     		= PRIM(E2) + PRIM(or) + PRIM(E2) + SIG(E1)	= {*,/,-, not, num, iden, bool}
+DIR(E1 -> E2)					= PRIM(E2) + SIG(E1)						= {*,/,-, not, num, iden, bool}
+
+DIR(E2 -> E3 rel E3)			= PRIM(E3) + PRIM(rel) + PRIM(E3) + SIG(E2)	= {*,/,-, not, num, iden, bool}
+
+DIR(E3 -> E3 * E4)				= PRIM(E3) + PRIM(*) + PRIM(E4) + SIG(E3)	= {*,/,-, not, num, iden, bool}
+DIR(E3 -> E3 / E4)				= PRIM(E3) + PRIM(/) + PRIM(E4) + SIG(E3)	= {*,/,-, not, num, iden, bool}
+DIR(E3 -> E4)					= PRIM(E4) + SIG(E3)						= {-, not, num, iden, bool}
+
+DIR(E4 -> - E4)					= PRIM(-) + PRIM(E4) + SIG(E4)				= {-}
+DIR(E4 -> not E5)				= PRIM(not) + PRIM(E5) + SIG(E4)			= {not}
+DIR(E4 -> E5)  					= PRIM(E5) + SIG(E4)						= {num, iden, bool}
+
+DIR(E5 -> num)					= PRIM(num) + SIG(E5)						= {num}
+DIR(E5 -> iden)					= PRIM(iden) + SIG(E5)						= {iden}
+DIR(E5 -> bool)					= PRIM(bool) + SIG(E5)						= {bool}

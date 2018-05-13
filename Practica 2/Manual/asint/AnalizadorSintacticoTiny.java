@@ -49,13 +49,40 @@ public class AnalizadorSintacticoTiny {
 	private void Declaraciones() {
 		switch (anticipo.clase()) {
 		case NUM:
+		case BOOL:
+			Declaracion();
+			RDeclaraciones();
+			break;
+		default:
+			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
+					ClaseLexica.NUM, ClaseLexica.BOOL);
+		}
+	}
+
+	private void Declaracion() {
+		switch (anticipo.clase()) {
+		case NUM:
 			empareja(ClaseLexica.NUM);
 			empareja(ClaseLexica.VARIABLE);
-			empareja(ClaseLexica.FIN_LINEA);
+			break;
 		case BOOL:
 			empareja(ClaseLexica.BOOL);
 			empareja(ClaseLexica.VARIABLE);
+			break;
+		default:
+			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
+					ClaseLexica.NUM, ClaseLexica.BOOL);
+		}
+	}
+
+	private void RDeclaraciones() {
+		switch (anticipo.clase()) {
+		case FIN_LINEA:
 			empareja(ClaseLexica.FIN_LINEA);
+			Declaracion();
+			RDeclaraciones();
+			break;
+		case SEPARADOR:
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
@@ -66,10 +93,8 @@ public class AnalizadorSintacticoTiny {
 	private void Instrucciones() {
 		switch (anticipo.clase()) {
 		case VARIABLE:
-			empareja(ClaseLexica.VARIABLE);
-			empareja(ClaseLexica.IGUAL);
-			E0();
-			empareja(ClaseLexica.FIN_LINEA);
+			Instruccion();
+			RInstrucciones();
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
@@ -77,13 +102,54 @@ public class AnalizadorSintacticoTiny {
 		}
 	}
 
+	private void Instruccion() {
+		switch (anticipo.clase()) {
+		case VARIABLE:
+			empareja(ClaseLexica.VARIABLE);
+			empareja(ClaseLexica.IGUAL);
+			E0();
+			break;
+		default:
+			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
+					ClaseLexica.VARIABLE);
+		}
+	}
+	
+	private void RInstrucciones() {
+		switch (anticipo.clase()) {
+		case FIN_LINEA:
+			empareja(ClaseLexica.FIN_LINEA);
+			Instruccion();
+			RInstrucciones();
+			break;
+		case EOF:
+			break;
+		default:
+			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
+					ClaseLexica.NUM, ClaseLexica.BOOL);
+		}
+	}
+
 	private void E0() {
 		switch (anticipo.clase()) {
+		case AND:
+		case OR:
+		case MUL:
+		case DIV:
 		case RESTA:
 		case NOT:
-		case VARIABLE:
-		case VALOR:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
 		case PAPERTURA:
+		case VARIABLE:
+		case NUM:
+		case SUMA:
+		case PCIERRE:
+		case FIN_LINEA:
 			E1();
 			E01();
 			break;
@@ -106,7 +172,8 @@ public class AnalizadorSintacticoTiny {
 			E1();
 			E01();
 			break;
-		case EOF:
+		case PCIERRE:
+		case FIN_LINEA:
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
@@ -116,11 +183,24 @@ public class AnalizadorSintacticoTiny {
 
 	private void E1() {
 		switch (anticipo.clase()) {
-		case VARIABLE:
+		case AND:
+		case OR:
+		case MUL:
+		case DIV:
 		case RESTA:
 		case NOT:
-		case VALOR:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
 		case PAPERTURA:
+		case VARIABLE:
+		case VALOR:
+		case SUMA:
+		case PCIERRE:
+		case FIN_LINEA:
 			E2();
 			FE2();
 			break;
@@ -137,12 +217,14 @@ public class AnalizadorSintacticoTiny {
 			empareja(ClaseLexica.AND);
 			E1();
 			break;
-
 		case OR:
 			empareja(ClaseLexica.OR);
 			E2();
 			break;
-		case EOF:
+		case PCIERRE:
+		case SUMA:
+		case RESTA:
+		case FIN_LINEA:
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
@@ -152,14 +234,26 @@ public class AnalizadorSintacticoTiny {
 
 	private void E2() {
 		switch (anticipo.clase()) {
+		case AND:
+		case OR:
+		case MUL:
+		case DIV:
 		case RESTA:
 		case NOT:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
+		case PAPERTURA:
 		case VARIABLE:
 		case VALOR:
-		case PAPERTURA:
+		case SUMA:
+		case PCIERRE:
+		case FIN_LINEA:
 			E3();
-			Rel();
-			E3();
+			FE3();
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
@@ -168,48 +262,73 @@ public class AnalizadorSintacticoTiny {
 		}
 	}
 
-	private void Rel() {
+	private void FE3() {
 		switch (anticipo.clase()) {
 		case MENOR_QUE:
 			empareja(ClaseLexica.MENOR_QUE);
+			E31();
 			break;
 		case MAYOR_QUE:
 			empareja(ClaseLexica.MAYOR_QUE);
+			E31();
 			break;
 		case MAYOR_IGUAL_QUE:
 			empareja(ClaseLexica.MAYOR_IGUAL_QUE);
+			E31();
 			break;
 		case MENOR_IGUAL_QUE:
 			empareja(ClaseLexica.MENOR_IGUAL_QUE);
+			E31();
 			break;
-		case IGUAL:
-			empareja(ClaseLexica.IGUAL);
+		case IGUAL_IGUAL:
+			empareja(ClaseLexica.IGUAL_IGUAL);
+			E31();
 			break;
 		case DISTINTO:
 			empareja(ClaseLexica.DISTINTO);
+			E31();
+			break;
+		case AND:
+		case OR:
+		case PCIERRE:
+		case SUMA:
+		case RESTA:
+		case FIN_LINEA:
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
 					ClaseLexica.MENOR_QUE, ClaseLexica.MAYOR_QUE,
 					ClaseLexica.MAYOR_IGUAL_QUE, ClaseLexica.MENOR_IGUAL_QUE,
-					ClaseLexica.IGUAL, ClaseLexica.DISTINTO);
+					ClaseLexica.IGUAL_IGUAL, ClaseLexica.DISTINTO);
 		}
-
 	}
 
 	private void E3() {
 		switch (anticipo.clase()) {
+		case AND:
+		case OR:
+		case MUL:
+		case DIV:
 		case RESTA:
 		case NOT:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
+		case PAPERTURA:
 		case VARIABLE:
 		case VALOR:
-		case PAPERTURA:
+		case SUMA:
+		case PCIERRE:
+		case FIN_LINEA:
 			E4();
 			E31();
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
-					ClaseLexica.VARIABLE, ClaseLexica.RESTA, ClaseLexica.NOT,
+					ClaseLexica.AND, ClaseLexica.RESTA, ClaseLexica.NOT,
 					ClaseLexica.VALOR, ClaseLexica.PAPERTURA);
 		}
 	}
@@ -226,7 +345,18 @@ public class AnalizadorSintacticoTiny {
 			E4();
 			E31();
 			break;
-		case EOF:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
+		case AND:
+		case OR:
+		case PCIERRE:
+		case SUMA:
+		case RESTA:
+		case FIN_LINEA:
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
@@ -247,12 +377,25 @@ public class AnalizadorSintacticoTiny {
 		case VARIABLE:
 		case VALOR:
 		case PAPERTURA:
+		case PCIERRE:
+		case AND:
+		case OR:
+		case FIN_LINEA:
+		case MUL:
+		case DIV:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
+		case SUMA:
+		case RESTA:
 			E5();
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),
-					ClaseLexica.NOT, ClaseLexica.RESTA, ClaseLexica.VARIABLE,
-					ClaseLexica.VALOR, ClaseLexica.PAPERTURA);
+					ClaseLexica.RESTA, ClaseLexica.NOT);
 		}
 	}
 
@@ -268,6 +411,21 @@ public class AnalizadorSintacticoTiny {
 			empareja(ClaseLexica.PAPERTURA);
 			E0();
 			empareja(ClaseLexica.PCIERRE);
+			break; pac,op3,op2,and,or,op0,puntocoma
+		case PCIERRE:
+		case AND:
+		case OR:
+		case FIN_LINEA:
+		case MUL:
+		case DIV:
+		case MENOR_QUE:
+		case MAYOR_QUE:
+		case MENOR_IGUAL_QUE:
+		case MAYOR_IGUAL_QUE:
+		case IGUAL_IGUAL:
+		case DISTINTO:
+		case SUMA:
+		case RESTA:
 			break;
 		default:
 			errores.errorSintactico(anticipo.fila(), anticipo.clase(),

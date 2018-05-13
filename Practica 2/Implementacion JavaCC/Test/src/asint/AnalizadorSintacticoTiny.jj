@@ -1,0 +1,57 @@
+options  {
+  STATIC=false;
+}  
+PARSER_BEGIN(AnalizadorSintacticoTiny)
+package asint;
+
+public class AnalizadorSintacticoTiny {}
+PARSER_END(AnalizadorSintacticoTiny)
+	TOKEN:{<#letra:["a"-"z","A"-"Z"]>}	
+	TOKEN:{<#digito:["0"-"9"]>}
+	TOKEN:{<#decimal:"." <digito>(<digito>)*>}
+	TOKEN:{<#exponente:("e"|"E")("+"|"-")?<digito>(<digito>)*>}
+	TOKEN:{<pa:"(">}
+	TOKEN:{<pc:")">}
+	
+	TOKEN:{<or:"or">}
+	TOKEN:{<and:"and">}
+	
+	TOKEN:{<not:"not">}
+	TOKEN:{<men:"men">}
+	
+	TOKEN:{<num:"num">}
+	TOKEN:{<bool:"bool">}
+	TOKEN:{<separador:"&&">}
+	
+	SKIP:{<["\t"," ","\r","\b","\n"]>}  
+	SKIP:{<"#"(~["\n"])*>}
+	
+	TOKEN:{<puntoComa:";">}
+	
+	TOKEN:{<numeroReal:("+"|"-")?<digito>(<digito>)*(<decimal>)?(<exponente>)?>}
+	
+	TOKEN:{<identificador: <letra>(<letra>|<digito>|"_")*>}
+	
+	void Sp()	: {} {S() <EOF>}
+	void S()	: {} {DEC() (";" DEC())* <separador> INS() (<puntoComa> INS())*}
+	void DEC()	: {} {(<num>|<bool>)<identificador>}
+	void INS()	: {} {<identificador> "=" E0()}
+	void E0() 	: {} {E1() E01()}
+	void E01()	: {} {OP0() E1() E01() | {}}
+	void E1() 	: {} {E2() FE2()}
+	void FE2()	: {} {<and> E1() | <or> E2() | {}}
+	void E2()	: {} {E3() FE3()}
+	void FE3()  : {} {OP2() E3() | {}}
+	void E3()	: {} {E4() E31()}
+	void E31()	: {} {OP3() E4() E31() | {}}
+	void E4()	: {} {<men> E4() | <not> E5() | E5()}
+	
+
+
+	void E5()	: {} {"(" E0() ")" | <identificador> | <numeroReal> | {}}
+	
+	void OP0()  : {} {"+" | "-"}
+	void OP1()  : {} {<and> | <or>}
+	void OP2()	: {} {"<" | "<=" | "==" | ">=" | ">"}
+	void OP3()	: {} {"*" | "/"}
+	void OP4()	: {} {"-u" | <not>}

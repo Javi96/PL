@@ -1,0 +1,5 @@
+num peso;
+bool pesado
+&&
+peso = 45 / 25;
+pesado = 14 + 45

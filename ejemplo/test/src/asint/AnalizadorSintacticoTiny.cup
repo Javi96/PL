@@ -1,0 +1,41 @@
+package asint;
+
+import java_cup.runtime.*;
+import alex.AnalizadorLexicoTiny;
+import alex.UnidadLexica;
+import errors.GestionErroresTiny;
+
+scan with {: return getScanner().next_token(); :};
+parser code {: 
+   private GestionErroresTiny errores;
+   public void syntax_error(Symbol unidadLexica) {
+     errores.errorSintactico((UnidadLexica)unidadLexica);
+   }
+:};
+init with {: 
+   errores = new GestionErroresTiny();
+   AnalizadorLexicoTiny alex = (AnalizadorLexicoTiny)getScanner();
+   alex.fijaGestionErrores(errores);
+:};
+
+terminal SPROG, EOL, NUM, ID, BOOL, IS, EQ, GT, GEQ, LT, LEQ, NEQ, AND, OR,
+    NOT, PLUS, MINUS, MUL, DIV, LREAL, TRUE, FALSE, POP, PCL;
+
+non terminal S, Prog, LDec, Dec, LIns, Ins, Exp0, Exp1, Exp2, Exp3, Exp4, Exp5,
+    Op0, Op2, Op3;
+
+S ::= Prog ;
+Prog ::= LDec SPROG LIns ;
+LDec ::= LDec EOL Dec | Dec ;
+LIns ::= LIns EOL Ins | Ins ;
+Dec ::= NUM ID | BOOL ID ;
+Ins ::= ID IS Exp0 ;
+Exp0 ::= Exp0 Op0 Exp1 | Exp1 ;
+Exp1 ::= Exp2 AND Exp1 | Exp2 OR Exp2 | Exp2 ;
+Exp2 ::= Exp3 Op2 Exp3 | Exp3 ;
+Exp3 ::= Exp3 Op3 Exp4 | Exp4 ;
+Exp4 ::= MINUS Exp4 | NOT Exp5 | Exp5 ;
+Exp5 ::= LREAL | TRUE | FALSE | POP Exp0 PCL ;
+Op0 ::= PLUS | MINUS ;
+Op2 ::= EQ | GT | GEQ | LT | LEQ | NEQ ;
+Op3 ::= MUL | DIV ;

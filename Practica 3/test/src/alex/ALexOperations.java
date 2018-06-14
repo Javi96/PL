@@ -3,50 +3,89 @@ package alex;
 import asint.ClaseLexica;
 
 public class ALexOperations {
-  private AnalizadorLexicoTiny alex;
-  public ALexOperations(AnalizadorLexicoTiny alex) {
-   this.alex = alex;   
-  }
-  public UnidadLexica unidadId() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.IDEN,alex.lexema()); 
-  } 
-  public UnidadLexica unidadEvalua() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.EVALUA,"evalua"); 
-  } 
-  public UnidadLexica unidadDonde() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.DONDE,"donde"); 
-  } 
-  public UnidadLexica unidadEnt() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.ENT,alex.lexema()); 
-  } 
-  public UnidadLexica unidadReal() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.REAL,alex.lexema()); 
-  } 
-  public UnidadLexica unidadSuma() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.MAS,"+"); 
-  } 
-  public UnidadLexica unidadResta() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.MENOS,"-"); 
-  } 
-  public UnidadLexica unidadMul() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.POR,"*"); 
-  } 
-  public UnidadLexica unidadDiv() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.DIV,"/"); 
-  } 
-  public UnidadLexica unidadPAp() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.PAP,"("); 
-  } 
-  public UnidadLexica unidadPCierre() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.PCIERRE,")"); 
-  } 
-  public UnidadLexica unidadIgual() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.IGUAL,"="); 
-  } 
-  public UnidadLexica unidadComa() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.COMA,","); 
-  } 
-  public UnidadLexica unidadEof() {
-     return new UnidadLexica(alex.fila(),ClaseLexica.EOF,"<EOF>"); 
-  }
+	private AnalizadorLexicoTiny alex;
+	public ALexOperations(AnalizadorLexicoTiny alex) {
+		this.alex = alex;   
+	}
+	public UnidadLexica unidadIgnorable() {
+		return new UnidadLexicaMultivaluada(alex.fila(),ClaseLexica.IGNORABLE,alex.lexema()); 
+	} 
+	public UnidadLexica unidadSuma() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.SUMA, "+"); 
+	} 
+	public UnidadLexica unidadResta() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.RESTA, "-"); 
+	} 
+	public UnidadLexica unidadMul() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.MUL, "*"); 
+	} 
+	public UnidadLexica unidadDiv() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.DIV, "/"); 
+	} 
+	public UnidadLexica unidadMenorQue() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.MENOR_QUE, "<"); 
+	} 	
+	public UnidadLexica unidadMayorQue() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.MAYOR_QUE, ">"); 
+	} 
+	public UnidadLexica unidadMenorIgualQue() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.MENOR_IGUAL_QUE, "<="); 
+	} 
+	public UnidadLexica unidadMayorIgualQue() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.MAYOR_IGUAL_QUE, ">="); 
+	} 
+	public UnidadLexica unidadIgual() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.IGUAL, "="); 
+	}
+	public UnidadLexica unidadIgualIgual() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.IGUAL_IGUAL, "=="); 
+	} 
+	public UnidadLexica unidadDistinto() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.DISTINTO, "!="); 
+	} 
+	public UnidadLexica unidadPApertura() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.PAPERTURA, "("); 
+	} 
+	public UnidadLexica unidadPCierre() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.PCIERRE, ")"); 
+	} 
+	public UnidadLexica unidadNum() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.NUM, "num"); 
+	} 
+	public UnidadLexica unidadBoolean() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.BOOL, "bool"); 
+	} 
+	public UnidadLexica unidadSepEntrada() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.SEP_ENTRADA, "&&"); 
+	} 
+	public UnidadLexica unidadFinLinea() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.FIN_LINEA, ";"); 
+	} 
+	public UnidadLexica unidadVariable() {
+		return new UnidadLexicaMultivaluada(alex.fila(),ClaseLexica.VARIABLE,alex.lexema()); 
+	} 
+	public UnidadLexica unidadTrue() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.TRUE, "true"); 
+	} 
+	public UnidadLexica unidadFalse() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.FALSE, "false"); 
+	} 
+	public UnidadLexica unidadValor() {
+		return new UnidadLexicaMultivaluada(alex.fila(),ClaseLexica.VALOR,alex.lexema()); 
+	}
+	public UnidadLexica unidadAnd() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.AND, "&"); 
+	}
+	public UnidadLexica unidadOr() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.OR, "|"); 
+	}
+	public UnidadLexica unidadNot() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.NOT, "!"); 
+	}
+	public UnidadLexica unidadEof() {
+		return new UnidadLexicaUnivaluada(alex.fila(),ClaseLexica.EOF, "<EOF>"); 
+	}
+	public void error() {
+		System.err.println("***"+alex.fila()+" Caracter inexperado: "+alex.lexema());
+	}
 }

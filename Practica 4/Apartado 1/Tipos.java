@@ -1,6 +1,6 @@
 package apartado1;
 
-public enum Tipo{
+public enum Tipos{
 	PROG, DEC, INS, DECS, DECC, INSS, INSC,
 	NUM, BOOL, TRUE, FALSE, NOT, MENOS,
 	DIV, MUL, MAS, OR, AND, MEMOS_UNARIO,
@@ -35,6 +35,8 @@ public enum Tipo{
 			case MAYOR: return "Mayor";
 			case IGUAL_IGUAL: return "IgualIgual";
 			case DISTINTO: return "Distinto";
+			case EXPBIN: return "ExpresionBinaria";
+			case EXP: return "Expresion";
 			default: throw new IllegalArgumentException();
 		}
 	}

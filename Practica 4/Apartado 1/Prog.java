@@ -10,6 +10,6 @@ public class Prog{
 
 	@Override
    	public String toString(){
-   		return Tipo.PROG.toString() + "(" + dec.toString() + "," + ins.toString() + ")";
+   		return Tipos.PROG.toString() + "(" + dec.toString() + "," + ins.toString() + ")";
    	}
 }

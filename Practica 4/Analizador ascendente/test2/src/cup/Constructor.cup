@@ -1,0 +1,108 @@
+package cup;
+
+import java_cup.runtime.*;
+import alex.AnalizadorLexicoTiny;
+import alex.UnidadLexica;
+import errors.GestionErroresTiny;
+import ast.Prog;
+import ast.Tipo;
+import ast.Dec;
+import ast.Ins;
+import ast.Expresion;
+import ast.GenerateExp;
+
+scan with {: return getScanner().next_token(); :};
+
+action code {:
+   private GenerateExp ex = new GenerateExp();
+:};
+
+parser code {:
+   private GestionErroresTiny error;
+   public void syntax_error(Symbol item) {
+     error.errorSintactico((UnidadLexica)item);
+   }
+:};
+
+init with {:
+   error = new GestionErroresTiny();
+   AnalizadorLexicoTiny lexer = (AnalizadorLexicoTiny)getScanner();
+   lexer.fijaGestionErrores(error);
+:};
+
+terminal String TRUE, FALSE, NOT, RESTA,
+    DIV, MUL, SUMA, OR, AND, 
+    MENOR_QUE, MAYOR_QUE, MENOR_IGUAL_QUE, MAYOR_IGUAL_QUE,
+    IGUAL_IGUAL, DISTINTO, FIN_LINEA, SEP_ENTRADA, 
+    IGUAL, PAPERTURA, PCIERRE, VARIABLE, NUM, BOOL, IGNORABLE,
+    VALOR;
+
+non terminal Tipo Tipo;
+non terminal Prog;
+non terminal Dec Dec;
+non terminal Ins Ins;
+non terminal Expresion E0, E1, E2, E3, E4, E5;
+
+
+Prog ::= Dec: aDEC SEP_ENTRADA Ins: aINS
+    {: RESULT=ex.prog(aDEC, aINS); :};
+Dec ::= Dec: aDEC FIN_LINEA Tipo: aTipo VARIABLE: lexVARIABLE
+    {: RESULT=ex.decC(aTipo, lexVARIABLE, aDEC); :};
+Dec ::= Tipo: aTipo VARIABLE: lexVARIABLE
+    {: RESULT=ex.decS(aTipo, lexVARIABLE); :};
+Ins ::= Ins: aINS FIN_LINEA VARIABLE: lexVARIABLE IGUAL E0: aEXPRESION
+    {: RESULT=ex.insC(lexVARIABLE, aEXPRESION, aINS); :};
+Ins ::= VARIABLE: lexVARIABLE IGUAL E0: aEXPRESION
+    {: RESULT=ex.insS(lexVARIABLE, aEXPRESION); :};
+Tipo ::= NUM
+    {: RESULT=ex.num(); :};
+Tipo ::= BOOL
+    {: RESULT=ex.bool(); :};
+E0 ::= E0: aEXPRESION SUMA E1: bEXPRESION
+    {: RESULT=ex.mas(aEXPRESION, bEXPRESION); :}; 
+E0 ::= E0: aEXPRESION RESTA E1: bEXPRESION
+    {: RESULT=ex.menos(aEXPRESION, bEXPRESION); :}; 
+E0 ::= E1: aEXPRESION
+    {: RESULT=aEXPRESION; :};   
+E1 ::= E2: aEXPRESION AND E1: bEXPRESION
+    {: RESULT=ex.and(aEXPRESION, bEXPRESION); :}; 
+E1 ::= E2: aEXPRESION OR E2: bEXPRESION
+    {: RESULT=ex.or(aEXPRESION, bEXPRESION); :}; 
+E1 ::= E2: aEXPRESION
+    {: RESULT=aEXPRESION; :}; 
+E2 ::= E3: aEXPRESION IGUAL_IGUAL E3: bEXPRESION
+    {: RESULT=ex.igualIgual(aEXPRESION, bEXPRESION); :}; 
+E2 ::= E3: aEXPRESION MAYOR_QUE E3: bEXPRESION
+    {: RESULT=ex.mayor(aEXPRESION, bEXPRESION); :}; 
+E2 ::= E3: aEXPRESION MAYOR_IGUAL_QUE E3: bEXPRESION
+    {: RESULT=ex.mayorIgual(aEXPRESION, bEXPRESION); :}; 
+E2 ::= E3: aEXPRESION MENOR_QUE E3: bEXPRESION
+    {: RESULT=ex.menor(aEXPRESION, bEXPRESION); :}; 
+E2 ::= E3: aEXPRESION MENOR_IGUAL_QUE E3: bEXPRESION
+    {: RESULT=ex.menor(aEXPRESION, bEXPRESION); :}; 
+E2 ::= E3: aEXPRESION DISTINTO E3: bEXPRESION
+    {: RESULT=ex.distinto(aEXPRESION, bEXPRESION); :}; 
+E2 ::= E3: aEXPRESION
+    {: RESULT=aEXPRESION; :}; 
+E3 ::= E3: aEXPRESION MUL E4: bEXPRESION
+    {: RESULT=ex.mul(aEXPRESION, bEXPRESION); :}; 
+E3 ::= E3: aEXPRESION DIV E4: bEXPRESION
+    {: RESULT=ex.div(aEXPRESION, bEXPRESION); :}; 
+E3 ::= E4: aEXPRESION
+    {: RESULT=aEXPRESION; :};   
+E4 ::= RESTA E4: aEXPRESION
+    {: RESULT=ex.menosUn(aEXPRESION); :}; 
+E4 ::= NOT E5: aEXPRESION
+    {: RESULT=ex.not(aEXPRESION); :}; 
+E4 ::= E5: aEXPRESION
+    {: RESULT=aEXPRESION; :};   
+E5 ::= VARIABLE: lexVARIABLE 
+    {: RESULT=ex.variable(lexVARIABLE); :}; 
+E5 ::= VALOR: lexVALOR 
+    {: RESULT=ex.real(lexVALOR); :}; 
+E5 ::= TRUE 
+    {: RESULT=ex.trueLex(); :}; 
+E5 ::= FALSE 
+    {: RESULT=ex.falseLex(); :}; 
+E5 ::= PAPERTURA E0: aEXPRESION PCIERRE
+    {: RESULT=aEXPRESION; :}; 

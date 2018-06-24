@@ -41,7 +41,7 @@ PARSER_END(AnalizadorSintacticoTiny)
 	void E1() 	: {} {E2() FE2()}
 	void FE2()	: {} {<and> E1() | <or> E2() | {}}
 	void E2()	: {} {E3() FE3()}
-	void FE3()      : {} {OP2() E3() | {}}
+	void FE3()  : {} {OP2() E3() | {}}
 	void E3()	: {} {E4() E31()}
 	void E31()	: {} {OP3() E4() E31() | {}}
 	void E4()	: {} {<men> E4() | <not> E5() | E5()}

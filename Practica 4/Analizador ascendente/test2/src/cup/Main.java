@@ -15,6 +15,3 @@ public class Main {
 		System.out.println(constast.parse().value);
 	}
 }
-
-//Dec ::= Tipo: aTipo VARIABLE: lexVARIABLE
-//{: RESULT=ex.decS(aTipo, lexVARIABLE); :};

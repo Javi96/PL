@@ -1,0 +1,245 @@
+options  {
+  STATIC=false;
+}  
+PARSER_BEGIN(AnalizadorSintacticoTiny)
+package asint;
+
+import ast.*;
+
+public class AnalizadorSintacticoTiny {
+	private GenerateExp ex = new GenerateExp();
+
+
+
+	private final static  int SUMA = 0;
+	private final static  int RESTA = 1;
+	private final static  int MUL = 2;
+	private final static  int DIV = 3;
+	private final static  int AND = 4;
+	private final static  int OR = 5;
+	private final static  int NOT = 6;
+	private final static  int MAYOR_QUE = 7;
+	private final static  int MENOR_QUE = 8;
+	private final static  int MAYOR_IGUAL_QUE = 9 ;
+	private final static  int MENOR_IGUAL_QUE = 10 ;
+	private final static  int DISTINTO = 11;
+	private final static  int IGUAL_IGUAL = 12;
+	private final static  int MENOS_UN = 13;
+
+	private Expresion switchBin(int opCode, Expresion op1, Expresion op2) {
+		switch(opCode) {
+			case SUMA:
+				return ex.mas(op1, op2);
+			case RESTA :
+				return ex.menos(op1, op2);
+			case MUL :
+				return ex.mul(op1, op2);
+			case DIV :
+				return ex.div(op1, op2);
+			case AND :
+				return ex.and(op1, op2);
+			case OR :
+				return ex.or(op1, op2);
+			case MAYOR_QUE :
+				return ex.mayor(op1, op2);
+			case MENOR_QUE :
+				return ex.menor(op1, op2);
+			case MAYOR_IGUAL_QUE  :
+				return ex.mayorIgual(op1, op2);
+			case MENOR_IGUAL_QUE  :
+				return ex.menorIgual(op1, op2);
+			case DISTINTO :
+				return ex.distinto(op1, op2);
+			case IGUAL_IGUAL :
+				return ex.igualIgual(op1, op2);
+			default:
+				throw new IllegalArgumentException("El codigo de operacion: " + opCode + " es erroneo");
+		}
+	}
+
+	private Expresion switchUn(int opCode, Expresion op){
+		switch(opCode){
+			case NOT:
+				return ex.not(op);
+			case MENOS_UN:
+				return ex.menosUn(op);
+			default:
+				throw new IllegalArgumentException("El codigo de operacion: " + opCode + " es erroneo");
+		}
+	}
+}
+PARSER_END(AnalizadorSintacticoTiny)
+	TOKEN:{<#letra:["a"-"z","A"-"Z"]>}	
+	TOKEN:{<#digito:["0"-"9"]>}
+	TOKEN:{<#decimal:"." <digito>(<digito>)*>}
+	TOKEN:{<#exponente:("e"|"E")("+"|"-")?<digito>(<digito>)*>}
+	TOKEN:{<pa:"(">}
+	TOKEN:{<pc:")">}
+	
+	TOKEN:{<or:"or">}
+	TOKEN:{<and:"and">}
+	
+	TOKEN:{<not:"not">}
+	TOKEN:{<men:"men">}
+	
+	TOKEN: {<t:"true">}
+	TOKEN: {<f:"false">}
+
+	TOKEN:{<num:"num">}
+	TOKEN:{<bool:"bool">}
+	TOKEN:{<separador:"&&">}
+	
+	SKIP:{<["\t"," ","\r","\b","\n"]>}  
+	SKIP:{<"#"(~["\n"])*>}
+	
+	TOKEN:{<puntoComa:";">}
+	
+	TOKEN:{<numeroReal:("+"|"-")?<digito>(<digito>)*(<decimal>)?(<exponente>)?>}
+	
+	TOKEN:{<identificador: <letra>(<letra>|<digito>|"_")*>}
+	
+    Prog S() : {Prog a;}{
+		a = Prog()
+		<EOF>
+		{return a;}
+	}
+	Prog Prog() : {Dec decC; Ins insC;}
+	{
+		decC = Declaraciones()
+		"&&"
+		insC = Instrucciones()
+		{return ex.prog(decC, insC);}
+	}
+
+	Dec Declaraciones() : {DeclaracionS declaracion; Dec RDeclaraciones;}{
+		declaracion = Declaracion()
+		RDeclaraciones = RDeclaraciones(ex.decS(declaracion.tipo, declaracion.variable))
+		{return RDeclaraciones;}
+	}
+
+	Dec RDeclaraciones(Dec ahRDeclaraciones) : {DeclaracionS declaracion; Dec RDeclaraciones;}{
+		";"
+		declaracion = Declaracion()
+		RDeclaraciones = RDeclaraciones(ex.decC(declaracion.tipo, declaracion.variable, ahRDeclaraciones))
+		{return RDeclaraciones;} |
+		{return ahRDeclaraciones;}
+	}
+
+	DeclaracionS Declaracion() : {Tipo tipo; Token v;}{
+		tipo = Tipo()
+		v=<identificador>
+		{return new DeclaracionS(tipo, v.image);}
+	}
+
+	Tipo Tipo() : {}{
+		"num" {return new Num();} | "bool" {return new Bool();}
+	}
+
+	Ins Instrucciones() : {InstruccionS instruccion; Ins Rinstrucciones;}{
+		instruccion = Instruccion()
+		Rinstrucciones = Rinstrucciones(ex.insS(instruccion.variable, instruccion.expresion))
+		{return Rinstrucciones;}
+	}
+
+	Ins Rinstrucciones(Ins ahRinstrucciones) : {InstruccionS instruccion; Ins rinstrucciones;}{
+		";"
+		instruccion = Instruccion()
+		rinstrucciones = Rinstrucciones(ex.insC(instruccion.variable, instruccion.expresion, ahRinstrucciones))
+		{return rinstrucciones;} | 
+		{return ahRinstrucciones;}
+	}
+	
+	InstruccionS Instruccion():{Token v; Expresion e;}{
+		v=<identificador>
+		"="
+		e = E0()
+		{return new InstruccionS(v.image, e);}
+	}
+
+	Expresion E0() : {Expresion e1; Expresion e01;}{
+		e1 = E1()
+		e01 = E01(e1)
+		{return e01;}
+	}
+	Expresion E01(Expresion ahE01):{int op0; Expresion e1; Expresion e01;}{
+		op0 = Op0()
+		e1 = E1()
+		e01 = E01(switchBin(op0, ahE01, e1))
+		{return e01;}|
+		{return ahE01;}
+	}
+	Expresion E1():{Expresion e2; Expresion fe2;}{
+		e2 = E2()
+		fe2 = Fe2(e2)
+		{return fe2;}
+	}
+	Expresion Fe2(Expresion ahFe2):{int op1; Expresion e1;}{
+		<and>
+		e1 = E1()
+		{return switchBin(AND, ahFe2, e1);} |
+		<or>
+		e1 = E2()
+		{return switchBin(OR, ahFe2, e1);} |
+		{return ahFe2;}
+	}
+	Expresion E2():{Expresion e3; Expresion fe3;}{
+		e3 = E3()
+		fe3 = Fe3(e3)
+		{return fe3;}
+	}
+	Expresion Fe3(Expresion ahFe3):{int op2; Expresion e3;}{
+		op2 = Op2()
+		e3 = E3()
+		{return switchBin(op2, ahFe3, e3);} |
+		{return ahFe3;}
+	}
+	Expresion E3():{Expresion e4; Expresion e31;}{
+		e4 = E4()
+		e31 = E31(e4)
+		{return e31;}
+	}
+	Expresion E31(Expresion ahE31):{int op3; Expresion e4; Expresion e31;}{
+		op3 = Op3()
+		e4 = E4()
+		{return switchBin(op3, ahE31, e4);} |
+		{return ahE31;}
+	}
+	Expresion E4():{int op; Expresion e;}{
+		"-"
+		e = E4()
+		{return switchUn(MENOS_UN, e);} |
+		"not"
+		e = E5()
+		{return switchUn(NOT, e);} |
+		e = E5()
+		{return e;}
+	}
+	Expresion E5():{Token token; Expresion e0;}{
+			token = <t> {return ex.trueLex();} |
+			token = <f> {return ex.falseLex();} |
+			token = <numeroReal> {return ex.real(token.image);} |
+			token = <identificador> {return ex.variable(token.image);} |
+			token = "(" e0 = E0() ")" {return e0;}
+	}
+	int Op0():{}{
+		"+" {return SUMA;} |
+		"-" {return RESTA;}
+	}
+	int Op2():{}{
+		"==" {return IGUAL_IGUAL;} |
+		"!=" {return DISTINTO;} |
+		"<" {return MENOR_QUE;} |
+		">" {return MAYOR_QUE;} |
+		"<=" {return MENOR_IGUAL_QUE;} |
+		">=" {return MAYOR_IGUAL_QUE;} 
+	}
+	int Op3():{}{
+		"*" {return MUL;} |
+		"/" {return DIV;} 
+	}
+
+
+
+
+
+

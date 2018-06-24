@@ -1,0 +1,7 @@
+num peso;
+num agua;
+bool g
+&&
+peso = not agua;
+peso = -002.00;
+g = 12.3e-56
